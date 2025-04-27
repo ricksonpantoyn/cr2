@@ -6,7 +6,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/xml;q=0.9, */*;q=0.8'
+      }
+    });
+    
     const data = await response.text();
 
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,7 +20,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.status(200).send(data);
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching from URL:', error);
     res.status(500).send('Error fetching requested URL.');
   }
 }
