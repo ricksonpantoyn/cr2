@@ -1,26 +1,22 @@
-export default async function handler(req, res) {
-  const { url } = req.query;
+const fetch = require('node-fetch');
 
+module.exports = async (req, res) => {
+  const { url } = req.query;
   if (!url) {
-    return res.status(400).send('Missing "url" query parameter.');
+    return res.status(400).json({ error: 'URL parameter is required' });
   }
 
   try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
-        'Accept': 'application/rss+xml, application/xml;q=0.9, */*;q=0.8'
-      }
-    });
-    
+    const response = await fetch(url);
+    if (!response.ok) {
+      return res.status(response.status).send(response.statusText);
+    }
     const data = await response.text();
-
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.status(200).send(data);
+    res.setHeader('Content-Type', 'text/xml');
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow CORS
+    res.send(data);
   } catch (error) {
-    console.error('Error fetching from URL:', error);
-    res.status(500).send('Error fetching requested URL.');
+    console.error('Proxy error:', error);
+    res.status(500).json({ error: 'Failed to fetch the requested URL' });
   }
-}
+};
